@@ -1,0 +1,20 @@
+PATH
+  remote: .
+  specs:
+    application_daemon (0.1.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    minitest (5.16.2)
+
+PLATFORMS
+  arm64-darwin-21
+  x86_64-linux
+
+DEPENDENCIES
+  application_daemon!
+  minitest
+
+BUNDLED WITH
+   2.3.3
