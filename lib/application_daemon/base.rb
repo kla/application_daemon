@@ -8,9 +8,10 @@ module ApplicationDaemon
       (@handlers ||= [ ]) << TickHandler.new(options.merge(seconds: seconds, proc: block))
     end
 
-    def initialize(sleep_time=DEFAULT_SLEEP)
-      @sleep_time = sleep_time
+    def initialize(sleep_time: DEFAULT_SLEEP, logger: nil)
+      @sleep_time = sleep_time || DEFAULT_SLEEP
       @ticks = 0
+      @logger = !logger && Object.const_defined?("::Rails") ? ::Rails.logger : logger
     end
 
     def handlers
@@ -28,7 +29,8 @@ module ApplicationDaemon
           handler.run(@ticks)
         end
       rescue => e
-        puts e.message
+        message = "#{e.message}\n#{e.backtrace.join("\n")}"
+        @logger ? @logger.error(message) : puts(message)
       ensure
         sleep(@sleep_time) unless options[:no_sleep]
         @ticks += 1

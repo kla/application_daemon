@@ -1,7 +1,16 @@
 require_relative "../test_helper"
 
 class DaemonTest < TestCase
-  let(:daemon) { ApplicationDaemon::Base.new }
+  class TestLogger
+    attr_reader :message
+
+    def error(message)
+      @message = message
+    end
+  end
+
+  let(:logger) { TestLogger.new }
+  let(:daemon) { ApplicationDaemon::Base.new(logger: logger) }
 
   after { daemon.handlers.clear }
 
@@ -32,5 +41,13 @@ class DaemonTest < TestCase
     daemon.run(max_ticks: 1, no_sleep: true)
     daemon.run(max_ticks: 1, no_sleep: true)
     assert_equal 2, daemon.handlers[0].times_ran
+  end
+
+  it "logs errors" do
+    ApplicationDaemon::Base.every :tick do
+      raise "something"
+    end
+    daemon.run(max_ticks: 1, no_sleep: true)
+    assert_match "something", logger.message
   end
 end
