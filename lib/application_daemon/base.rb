@@ -26,7 +26,7 @@ module ApplicationDaemon
 
         handlers.each do |handler|
           next unless handler.run?(@ticks)
-          handler.run(@ticks)
+          handler.run(self, @ticks)
         end
       rescue => e
         message = "#{e.message}\n#{e.backtrace.join("\n")}"

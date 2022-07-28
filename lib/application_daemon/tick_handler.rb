@@ -16,8 +16,8 @@ module ApplicationDaemon
       @times_ran  = 0
     end
 
-    def run(ticks)
-      instance_exec(&proc)
+    def run(daemon, ticks)
+      daemon.instance_exec(&proc)
     ensure
       @last_ran = Time.now
       @times_ran += 1
