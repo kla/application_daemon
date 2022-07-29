@@ -35,6 +35,12 @@ class DaemonTest < TestCase
     assert_equal 1, daemon.handlers[0].times_ran
   end
 
+  it "does not run at_start if time specified" do
+    ApplicationDaemon::Base.every 1, at_start: false do; end
+    daemon.run(max_ticks: 11) # 0.1 tick
+    assert_equal 1, daemon.handlers[0].times_ran
+  end
+
   it "can only run max times" do
     ApplicationDaemon::Base.every :tick, max: 2 do; end
     daemon.run(max_ticks: 1, no_sleep: true)

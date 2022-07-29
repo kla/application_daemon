@@ -6,6 +6,7 @@ module ApplicationDaemon
     attr_reader :times_ran
     attr_reader :max
     attr_reader :proc
+    attr_accessor :daemon
 
     def initialize(options)
       @every      = options[:seconds] != :tick ? options[:seconds] : nil
@@ -14,9 +15,10 @@ module ApplicationDaemon
       @proc       = options[:proc]
       @last_ran   = nil
       @times_ran  = 0
+      @daemon     = nil
     end
 
-    def run(daemon, ticks)
+    def run(ticks)
       daemon.instance_exec(&proc)
     ensure
       @last_ran = Time.now
@@ -27,12 +29,12 @@ module ApplicationDaemon
       return false if !at_start && ticks == 0
       return false if max && times_ran >= max
       return true unless every # always run if `every` is not set
-      return true if !last_ran || seconds_since_last_ran >= every
+      return true if (!last_ran && at_start) || seconds_since_last_ran >= every
       return false
     end
 
     def seconds_since_last_ran
-      last_ran ? Time.now - last_ran : nil
+      Time.now - (last_ran || daemon.started_at)
     end
   end
 end

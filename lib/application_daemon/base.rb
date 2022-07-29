@@ -4,11 +4,14 @@ module ApplicationDaemon
   class Base
     DEFAULT_SLEEP = 0.1 # seconds
 
+    attr_reader :started_at
+
     def self.every(seconds, options={}, &block)
       (@handlers ||= [ ]) << TickHandler.new(options.merge(seconds: seconds, proc: block))
     end
 
     def initialize(sleep_time: DEFAULT_SLEEP, logger: nil)
+      @started_at = Time.now
       @sleep_time = sleep_time || DEFAULT_SLEEP
       @ticks = 0
       @logger = !logger && Object.const_defined?("::Rails") ? ::Rails.logger : logger
@@ -25,8 +28,9 @@ module ApplicationDaemon
         next unless handlers
 
         handlers.each do |handler|
+          handler.daemon = self unless handler.daemon
           next unless handler.run?(@ticks)
-          handler.run(self, @ticks)
+          handler.run(@ticks)
         end
       rescue => e
         message = "#{e.message}\n#{e.backtrace.join("\n")}"
@@ -36,6 +40,10 @@ module ApplicationDaemon
         @ticks += 1
         return if options[:max_ticks] && @ticks >= options[:max_ticks]
       end
+    end
+
+    def elapsed
+      Time.now - @started_at
     end
   end
 end
