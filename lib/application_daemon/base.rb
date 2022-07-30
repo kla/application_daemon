@@ -4,17 +4,18 @@ module ApplicationDaemon
   class Base
     DEFAULT_SLEEP = 0.1 # seconds
 
-    attr_reader :started_at
+    attr_reader :started_at, :options
 
     def self.every(seconds, options={}, &block)
       (@handlers ||= [ ]) << TickHandler.new(options.merge(seconds: seconds, proc: block))
     end
 
-    def initialize(sleep_time: DEFAULT_SLEEP, logger: nil)
+    def initialize(options={})
       @started_at = Time.now
-      @sleep_time = sleep_time || DEFAULT_SLEEP
+      @sleep_time = options.fetch(:sleep_time, DEFAULT_SLEEP)
       @ticks = 0
-      @logger = Gem.loaded_specs.has_key?('rails') ? Rails.logger : logger
+      @logger = options[:logger] || (Gem.loaded_specs.has_key?('rails') ? Rails.logger : nil)
+      @options = options.reject { |k| k == :sleep_time || k == :logger }
     end
 
     def handlers
