@@ -16,5 +16,7 @@ Gem::Specification.new do |spec|
 
   spec.metadata["allowed_push_host"] = "https://github.com/kla/application_daemon"
 
+  spec.add_dependency "concurrent-ruby"
   spec.add_development_dependency "minitest"
+  spec.add_development_dependency "rake"
 end
