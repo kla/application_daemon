@@ -8,19 +8,23 @@ module ApplicationDaemon
       end
 
       def executor
-        @executor ||= ::Concurrent::ThreadPoolExecutor.new(
-          min_threads: options.fetch(:min_threads, Concurrent.processor_count),
-          max_threads: options.fetch(:max_threads, Concurrent.processor_count),
-          max_queue: max_queue,
-        )
+        @executor ||= ::Concurrent::ThreadPoolExecutor.new(min_threads: min_threads, max_threads: max_threads, max_queue: max_queue)
       end
 
       def enqueue(&block)
         queue << ::Concurrent::Future.execute(executor: executor, &block)
       end
 
+      def min_threads
+        options.fetch(:min_threads, Concurrent.processor_count)
+      end
+
+      def max_threads
+        options.fetch(:min_threads, Concurrent.processor_count)
+      end
+
       def max_queue
-        options.fetch(:max_queue, Concurrent.processor_count * 5)
+        options.fetch(:max_queue, max_threads * 5)
       end
 
       def can_enqueue?
