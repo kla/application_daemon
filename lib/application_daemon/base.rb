@@ -25,7 +25,15 @@ module ApplicationDaemon
     def run(options={})
       raise "No handlers defined!" unless handlers
 
+      terminate = false
+      Signal.trap("INT") { terminate = true }
+      Signal.trap("TERM") { terminate = true }
+
       loop do
+        if terminate
+          puts "Terminating..."
+          return
+        end
         next unless handlers
 
         handlers.each do |handler|

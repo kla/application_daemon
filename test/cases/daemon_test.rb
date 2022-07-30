@@ -12,7 +12,7 @@ class DaemonTest < TestCase
   let(:logger) { TestLogger.new }
   let(:daemon) { ApplicationDaemon::Base.new(logger: logger) }
 
-  after { daemon.handlers.clear }
+  after { daemon.handlers&.clear }
 
   it "runs on every tick" do
     ApplicationDaemon::Base.every :tick do; end
