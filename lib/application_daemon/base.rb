@@ -14,7 +14,7 @@ module ApplicationDaemon
       @started_at = Time.now
       @sleep_time = sleep_time || DEFAULT_SLEEP
       @ticks = 0
-      @logger = !logger && Object.const_defined?("::Rails") ? ::Rails.logger : logger
+      @logger = Gem.loaded_specs.has_key?('rails') ? Rails.logger : logger
     end
 
     def handlers

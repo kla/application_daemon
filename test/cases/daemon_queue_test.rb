@@ -12,4 +12,12 @@ class DaemonQueueTest < TestCase
     daemon.wait_for_tasks
     assert @enqueued
   end
+
+  it "removes completed tasks" do
+    daemon.enqueue { }
+    daemon.wait_for_tasks
+    assert_equal 1, daemon.queue.length
+    daemon.remove_completed
+    assert_equal 0, daemon.queue.length
+  end
 end
