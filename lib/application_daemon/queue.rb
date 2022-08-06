@@ -2,6 +2,23 @@ require "concurrent"
 
 module ApplicationDaemon
   module Queue
+    class Task
+      attr_reader :name, :future
+
+      def initialize(name:, future:, &block)
+        @name = name || block.to_s
+        @future = future
+      end
+
+      def completed?
+        future.fulfilled?
+      end
+
+      def value
+        future.value
+      end
+    end
+
     module InstanceMethods
       def queue
         @queue ||= [ ]
@@ -11,8 +28,8 @@ module ApplicationDaemon
         @executor ||= ::Concurrent::ThreadPoolExecutor.new(min_threads: min_threads, max_threads: max_threads, max_queue: max_queue)
       end
 
-      def enqueue(&block)
-        queue << ::Concurrent::Future.execute(executor: executor, &block)
+      def enqueue(name: nil, &block)
+        queue << Task.new(name: name, future: ::Concurrent::Future.execute(executor: executor, &block))
       end
 
       def min_threads
@@ -32,7 +49,7 @@ module ApplicationDaemon
       end
 
       def remove_completed
-        queue.reject!(&:fulfilled?)
+        queue.reject!(&:completed?)
       end
 
       def wait_for_tasks

@@ -20,4 +20,9 @@ class DaemonQueueTest < TestCase
     daemon.remove_completed
     assert_equal 0, daemon.queue.length
   end
+
+  it "accepts a :name option" do
+    daemon.enqueue(name: "eh") { }
+    assert_equal "eh", daemon.queue[0].name
+  end
 end
