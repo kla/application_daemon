@@ -3,11 +3,12 @@ require "concurrent"
 module ApplicationDaemon
   module Queue
     class Task
-      attr_reader :name, :future
+      attr_reader :name, :future, :enqueued_at
 
       def initialize(name:, future:, &block)
         @name = name || block.to_s
         @future = future
+        @enqueued_at = Time.now
       end
 
       def completed?
@@ -16,6 +17,10 @@ module ApplicationDaemon
 
       def value
         future.value
+      end
+
+      def state
+        future.state
       end
     end
 
