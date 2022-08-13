@@ -12,7 +12,7 @@ module ApplicationDaemon
       end
 
       def completed?
-        future.fulfilled?
+        future.fulfilled? || future.rejected?
       end
 
       def value
