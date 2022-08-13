@@ -7,6 +7,7 @@ module ApplicationDaemon
 
       def initialize(name:, &block)
         @name = name || block.to_s
+        @enqueued_at = Time.now
         @block = block
       end
 
