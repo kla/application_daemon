@@ -3,12 +3,11 @@ require "concurrent"
 module ApplicationDaemon
   module Queue
     class Task
-      attr_reader :name, :future, :enqueued_at
+      attr_reader :name, :future, :enqueued_at, :block
 
-      def initialize(name:, future:, &block)
+      def initialize(name:, &block)
         @name = name || block.to_s
-        @future = future
-        @enqueued_at = Time.now
+        @block = block
       end
 
       def completed?
@@ -22,6 +21,10 @@ module ApplicationDaemon
       def state
         future.state
       end
+
+      def execute(executor)
+        @future = Concurrent::Future.execute(executor: executor, &block)
+      end
     end
 
     module InstanceMethods
@@ -34,7 +37,8 @@ module ApplicationDaemon
       end
 
       def enqueue(name: nil, &block)
-        queue << Task.new(name: name, future: ::Concurrent::Future.execute(executor: executor, &block))
+        queue << (task = Task.new(name: name, &block))
+        task.execute(executor)
       end
 
       def min_threads
