@@ -20,6 +20,8 @@ module ApplicationDaemon
 
     def run(ticks)
       daemon.instance_exec(&proc)
+    rescue => e
+      daemon.on_error(e)
     ensure
       @last_ran = Time.now
       @times_ran += 1

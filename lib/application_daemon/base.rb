@@ -54,5 +54,9 @@ module ApplicationDaemon
     def elapsed
       Time.now - @started_at
     end
+
+    def on_error(exception)
+      raise exception
+    end
   end
 end
